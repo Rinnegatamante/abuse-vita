@@ -23,7 +23,7 @@ CC      = $(PREFIX)-gcc
 CXX      = $(PREFIX)-g++
 CFLAGS  = -fno-lto -g -Wl,-q -O2 -ftree-vectorize -DVITA \
 	-DNO_CHECK -DPACKAGE_NAME="\"Abuse\"" -DPACKAGE_VERSION="\"0.8\"" -DASSETDIR="\"app0:/\"" \
-	$(INCLUDE_DIRS) -I$(VITASDK)/$(PREFIX)/include/SDL2
+	$(INCLUDE_DIRS) -I$(VITASDK)/$(PREFIX)/include/SDL2 -Wno-class-conversion
 CXXFLAGS  = $(CFLAGS) -fno-exceptions -std=gnu++11 -fpermissive
 ASFLAGS = $(CFLAGS)
 
@@ -33,8 +33,7 @@ all: $(TARGET).velf
 	cp $< $<.unstripped.elf
 	$(PREFIX)-strip -g $<
 	vita-elf-create $< $@
-	vita-make-fself -a 0x2800000000000001 $@ eboot_unsafe.bin
-	vita-make-fself -s $@ eboot_safe.bin
+	vita-make-fself -s $@ eboot.bin
 
 $(TARGET).elf: $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@

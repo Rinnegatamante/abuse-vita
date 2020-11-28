@@ -53,7 +53,7 @@ int sound_init( int argc, char **argv )
         return 0;
     }
 
-#ifndef __SWITCH__
+#ifndef VITA
     // Check for the sfx directory, disable sound if we can't find it.
     datadir = get_filename_prefix();
     sfxdir = (char *)malloc( strlen( datadir ) + 5 + 1 );
@@ -181,7 +181,7 @@ song::song(char const * filename)
     strcpy(realname, get_filename_prefix());
     strcat(realname, filename);
 
-#ifndef __SWITCH__
+#ifndef VITA
     uint32_t data_size;
     data = load_hmi(realname, data_size);
 

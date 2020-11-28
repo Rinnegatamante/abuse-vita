@@ -22,6 +22,7 @@
 #   include "config.h"
 #endif
 
+#include <vitasdk.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -354,7 +355,7 @@ void setup( int argc, char **argv )
         if( (fd = fopen( savedir, "r" )) == NULL )
         {
             // FIXME: Add some error checking here
-            mkdir( savedir, S_IRUSR | S_IWUSR | S_IXUSR );
+			sceIoMkdir( savedir, 0777);
         }
         else
         {
@@ -402,7 +403,7 @@ void setup( int argc, char **argv )
 
     controller = NULL;
     // try using the first available game controller
-#ifdef __SWITCH__
+#ifdef VITA
     flags.gamepad = 1;
 #endif
     if( flags.gamepad )

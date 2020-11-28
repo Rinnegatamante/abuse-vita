@@ -88,7 +88,7 @@ void set_mode(int mode, int argc, char **argv)
 			      SDL_WINDOWPOS_UNDEFINED,
 			      SDL_WINDOWPOS_UNDEFINED,
 			      win_width, win_height,
-#ifdef __SWITCH__
+#ifdef VITA
 			      SDL_WINDOW_FULLSCREEN
 #else
 			      (flags.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)

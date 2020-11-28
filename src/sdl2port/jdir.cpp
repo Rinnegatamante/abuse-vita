@@ -44,9 +44,7 @@ void get_directory(char *path, char **&files, int &tfiles, char **&dirs, int &td
 
     char **tlist = NULL;
     int t = 0;
-    char curdir[200];
-    getcwd( curdir, 200 );
-    chdir( path );
+    char fulldir[200];
 
     do
     {
@@ -62,7 +60,8 @@ void get_directory(char *path, char **&files, int &tfiles, char **&dirs, int &td
 
     for( int i=0; i < t; i++ )
     {
-        d = opendir( tlist[i] );
+		sprintf(fulldir, "app0:/data/%s", tlist[i]); 
+        d = opendir( fulldir );
         if( d )
         {
             tdirs++;
@@ -80,5 +79,4 @@ void get_directory(char *path, char **&files, int &tfiles, char **&dirs, int &td
     }
     if( t )
         free( tlist );
-    chdir( curdir );
 }

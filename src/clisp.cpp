@@ -12,6 +12,7 @@
 #   include "config.h"
 #endif
 
+#include <vitasdk.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -945,7 +946,7 @@ void *l_caller(long number, void *args)
       char const *cd = "Player";
 #else
       char cd[150];
-      getcwd(cd, 100);
+      sceAppUtilSystemParamGetString(SCE_SYSTEM_PARAM_ID_USERNAME, (SceChar8*)cd, SCE_SYSTEM_PARAM_USERNAME_MAXSIZE);
 #endif
       return LString::Create(cd);
     } break;

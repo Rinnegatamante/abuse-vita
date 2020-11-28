@@ -291,10 +291,10 @@ void jFILE::open_external(char const *filename, char const *mode, int flags)
 {
   int skip_size=0;
   char tmp_name[200];
-#ifndef __SWITCH__
+#ifndef VITA
     if(spec_prefix && filename[0] != '/')
 #else
-    if (spec_prefix && strncmp(filename, "sdmc", 4) != 0 && strncmp(filename, "romfs", 5) != 0)
+    if (spec_prefix && strncmp(filename, "app0:", 5) != 0 && strncmp(filename, "ux0:", 4) != 0)
 #endif
     sprintf(tmp_name,"%s%s",spec_prefix,filename);
   else strcpy(tmp_name,filename);

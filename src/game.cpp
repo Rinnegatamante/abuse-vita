@@ -12,6 +12,7 @@
 #   include "config.h"
 #endif
 
+#include <vitasdk.h>
 #include <ctype.h>
 #include <setjmp.h>
 #include <unistd.h>
@@ -93,10 +94,10 @@ FILE *open_FILE(char const *filename, char const *mode)
 {
     /* FIXME: potential buffer overflow here */
     char tmp_name[200];
-#ifndef __SWITCH__
+#ifndef vita
     if(get_filename_prefix() && filename[0] != '/')
 #else
-    if (get_filename_prefix() && strncmp(filename, "sdmc", 4) != 0 && strncmp(filename, "romfs", 5) != 0)
+    if (get_filename_prefix() && strncmp(filename, "app0:", 5) != 0 && strncmp(filename, "ux0:", 4) != 0)
 #endif
         sprintf(tmp_name, "%s %s", get_filename_prefix(), filename);
     else
@@ -2273,17 +2274,13 @@ void game_net_init(int argc, char **argv)
   }
 }
 
-#ifdef __SWITCH__
-void initSwitch();
-void deinitSwitch();
-#endif
-
 extern "C" {
 int main(int argc, char *argv[])
 {
-#ifdef __SWITCH__
-    initSwitch();
-#endif
+	scePowerSetArmClockFrequency(444);
+	scePowerSetBusClockFrequency(222);
+	scePowerSetGpuClockFrequency(222);
+	scePowerSetGpuXbarClockFrequency(166);
     start_argc = argc;
     start_argv = argv;
 
@@ -2336,8 +2333,8 @@ int main(int argc, char *argv[])
 
     setup(argc, argv);
 
-#if defined(__SWITCH__)
-    set_save_filename_prefix("sdmc:/switch/");
+#if defined(VITA)
+    set_save_filename_prefix("ux0:data/abuse/");
 #elif !defined __CELLOS_LV2__
     // look to see if we are supposed to fetch the data elsewhere
     if (getenv("ABUSE_PATH"))
@@ -2505,10 +2502,6 @@ int main(int argc, char *argv[])
 
     sound_uninit();
 
-
-#ifdef __SWITCH__
-    deinitSwitch();
-#endif
     return 0;
 }
 }
