@@ -1,4 +1,9 @@
-data/
+*.o
+*.vpk
+*.bin
+*.sfo
+*.velf
+*.elf
 build/
 abuse.*
 *.swp

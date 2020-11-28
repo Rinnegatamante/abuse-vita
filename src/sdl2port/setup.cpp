@@ -31,7 +31,7 @@
 #include <Carbon/Carbon.h>
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
-#elif !defined(__SWITCH__)
+#elif !defined(VITA)
 #include <GL/gl.h>
 #include <GL/glu.h>
 #endif    /* __APPLE__ */

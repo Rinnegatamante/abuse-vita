@@ -260,7 +260,7 @@ void EventHandler::SysEvent(Event &ev)
 
 	    switch (sdlev.jbutton.button) 
 	    {
-              case (int)Switch_Joy::KEY_LSTICK_LEFT:
+              /*case (int)Switch_Joy::KEY_LSTICK_LEFT:
                 ev.key = JK_LEFT;
               	break;
               case (int)Switch_Joy::KEY_LSTICK_UP:
@@ -271,7 +271,7 @@ void EventHandler::SysEvent(Event &ev)
               	break;
               case (int)Switch_Joy::KEY_LSTICK_RIGHT:
                 ev.key = JK_RIGHT;
-                break;
+                break;*/
 	      case 8:
 		ev.key = get_key_binding("b1", 0);
 		break;
