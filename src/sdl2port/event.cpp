@@ -80,7 +80,7 @@ void EventHandler::SysInit()
 
 void EventHandler::SysWarpMouse(ivec2 pos)
 {
-    SDL_WarpMouseInWindow(window, pos.x, pos.y);
+    //SDL_WarpMouseInWindow(window, pos.x, pos.y);
 }
 
 //
@@ -421,13 +421,13 @@ void EventHandler::SysEvent(Event &ev)
 		if(flags.fullscreen)
 		{
 		    flags.fullscreen = 0;
-		    SDL_SetWindowFullscreen(window, 0);
-		    SDL_SetWindowSize(window, flags.xres, flags.yres);
+		    //SDL_SetWindowFullscreen(window, 0);
+		    //SDL_SetWindowSize(window, flags.xres, flags.yres);
 		}
 		else
 		{
 		    flags.fullscreen = 1;
-		    SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+		    //SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
             }
             ev.key = EV_SPURIOUS;
@@ -437,16 +437,16 @@ void EventHandler::SysEvent(Event &ev)
             if(ev.type == EV_KEY)
             {
 		// Toggle grab mouse
-		if( SDL_GetWindowGrab(window) == SDL_TRUE )
-		{
+		//if( SDL_GetWindowGrab(window) == SDL_TRUE )
+		//{
 		    the_game->show_help( "Grab Mouse: OFF\n" );
-		    SDL_SetWindowGrab(window, SDL_FALSE);
-		}
+		    //SDL_SetWindowGrab(window, SDL_FALSE);
+		/*}
 		else
 		{
 		    the_game->show_help( "Grab Mouse: ON\n" );
 		    SDL_SetWindowGrab(window, SDL_TRUE);
-		}
+		}*/
             }
             ev.key = EV_SPURIOUS;
             break;

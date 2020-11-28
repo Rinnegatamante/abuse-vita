@@ -31,8 +31,9 @@
 #include "image.h"
 #include "setup.h"
 
-SDL_Window *window = NULL;
-SDL_Renderer *renderer = NULL;
+#include <vitasdk.h>
+#include <vita2d.h>
+
 SDL_Surface *surface = NULL;
 SDL_Surface *rgba_surface = NULL;
 SDL_Texture *texture = NULL;
@@ -56,66 +57,19 @@ static int power_of_two(int input)
     return value;
 }
 
+vita2d_texture *tex_buffer = nullptr;
+bool palette_set = false;
+uint8_t *tex_ptr;
+
 //
 // set_mode()
 // Set the video mode
 //
 void set_mode(int mode, int argc, char **argv)
 {
-    // Calculate the window scale
-    int win_width = xres;
-    int win_height = yres;
-    if (win_width < 640)
-        win_width *= 2;
-    if (win_height < 400)
-        win_height *= 2;
-    if (xres == 320 && yres == 200)
-    {
-        // Correct for the weird 320x200 aspect ratio
-        win_width = 640;
-        win_height = 480;
-    }
-    win_xscale = mouse_xscale = (flags.xres << 16) / xres;
-    win_yscale = mouse_yscale = (flags.yres << 16) / yres;
-
-    // force no scaling, let the hw do it
-    win_xscale = win_yscale = 1 << 16;
-
-    // Set the icon for this window.  Looks nice on taskbars etc.
-    //SDL_WM_SetIcon(SDL_LoadBMP("abuse.bmp"), NULL);
-
-    window = SDL_CreateWindow("Abuse",
-			      SDL_WINDOWPOS_UNDEFINED,
-			      SDL_WINDOWPOS_UNDEFINED,
-			      win_width, win_height,
-#ifdef VITA
-			      SDL_WINDOW_FULLSCREEN
-#else
-			      (flags.fullscreen ? SDL_WINDOW_FULLSCREEN_DESKTOP : 0)
-#endif
-     );
-
-    if(window == NULL)
-    {
-        printf("Video : Unable to create window: %s\n", SDL_GetError());
-        exit(1);
-    }
-    
-    renderer = SDL_CreateRenderer(window, -1, 0);
-    
-    if(renderer == NULL)
-    {
-        printf("Video : Unable to create renderer: %s\n", SDL_GetError());
-        exit(1);
-    }
-
-    // This will make sure that the aspect ratio is maintained in fullscreen mode
-    if (xres == 320 && yres == 200) {
-        // Lie. This fixes the aspect ratio for us.
-        SDL_RenderSetLogicalSize(renderer, 320, 240);
-    } else {
-        SDL_RenderSetLogicalSize(renderer, xres, yres);
-    }
+	vita2d_init();
+    tex_buffer = vita2d_create_empty_texture_format(xres, yres, SCE_GXM_TEXTURE_FORMAT_P8_ARGB);
+	tex_ptr = (uint8_t*)vita2d_texture_get_datap(tex_buffer);
 
     // Create the screen image
     main_screen = new image(ivec2(xres, yres), NULL, 2);
@@ -126,60 +80,6 @@ void set_mode(int mode, int argc, char **argv)
         exit(1);
     }
     main_screen->clear();
-
-    int w, h;
-    
-    // texture width/height should be power of 2
-    // FIXME: we can use GL_ARB_texture_non_power_of_two or
-    // GL_ARB_texture_rectangle to avoid the extra memory allocation
-    //w = power_of_two(xres);
-    //h = power_of_two(yres);
-    w = xres;
-    h = yres;
-
-    // create texture surface
-    texture = SDL_CreateTexture(renderer,
-				SDL_PIXELFORMAT_ARGB8888,
-				SDL_TEXTUREACCESS_STREAMING,
-				w, h);
-
-    // Create our 8-bit surface
-    surface = SDL_CreateRGBSurface(0, xres, yres, 8, 0, 0, 0, 0);
-    if(surface == NULL)
-    {
-        // Our surface is no good, we have to bail.
-        printf("Video : Unable to create 8-bit surface.\n");
-        exit(1);
-    }
-
-    // Create our RGBA surface    
-    int bpp;
-    Uint32 rmask, gmask, bmask, amask;
-    SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ARGB8888, &bpp, &rmask, &gmask, &bmask, &amask);
-    
-    rgba_surface = SDL_CreateRGBSurface(0, xres, yres, bpp, rmask, gmask, bmask, amask);
-    if(rgba_surface == NULL)
-    {
-        // Our surface is no good, we have to bail.
-        printf("Video : Unable to create RGBA surface.\n");
-        exit(1);
-    }
-    
-    //printf("Video : %dx%d %dbpp\n", window->w, window->h, window->format->BitsPerPixel);
-    //printf("Video : %dx%d %dbpp\n", flags.xres, flags.yres, bpp);
-    {
-      SDL_DisplayMode m;
-      SDL_GetWindowDisplayMode(window, &m);
-      SDL_RendererInfo rendererInfo;
-      SDL_GetRendererInfo(renderer, &rendererInfo);
-      printf("Video : %dx%d %dbpp (renderer: %s)\n", m.w, m.h,
-          SDL_BITSPERPIXEL(m.format), rendererInfo.name);
-    }
-
-    // Grab and hide the mouse cursor
-    SDL_ShowCursor(0);
-    if(flags.grabmouse)
-	SDL_SetWindowGrab(window, SDL_TRUE);
 
     update_dirty(main_screen);
 }
@@ -193,15 +93,6 @@ void close_graphics()
     if(lastl)
         delete lastl;
     lastl = NULL;
-    // Free our 8-bit surface
-    if(surface) 
-        SDL_FreeSurface(surface);
-
-    if(rgba_surface) 
-        SDL_FreeSurface(rgba_surface);
-
-    if (texture)
-        SDL_DestroyTexture(texture);
 
     delete main_screen;
 }
@@ -212,7 +103,6 @@ void close_graphics()
 void put_part_image(image *im, int x, int y, int x1, int y1, int x2, int y2)
 {
     int xe, ye;
-    SDL_Rect srcrect, dstrect;
     int ii, jj;
     int srcx, srcy, xstep, ystep;
     Uint8 *dpixel;
@@ -229,7 +119,7 @@ void put_part_image(image *im, int x, int y, int x1, int y1, int x2, int y2)
         x1 += -x;
         x = 0;
     }
-    srcrect.x = x1;
+	srcx = x1;
     if(x + (x2 - x1) >= xres)
         xe = xres - x + x1 - 1;
     else
@@ -240,80 +130,30 @@ void put_part_image(image *im, int x, int y, int x1, int y1, int x2, int y2)
         y1 += -y;
         y = 0;
     }
-    srcrect.y = y1;
+	srcy = y1;
     if(y + (y2 - y1) >= yres)
         ye = yres - y + y1 - 1;
     else
         ye = y2;
 
-    if(srcrect.x >= xe || srcrect.y >= ye)
+    if(x1 >= xe || y1 >= ye)
         return;
 
     // Scale the image onto the surface
-    srcrect.w = xe - srcrect.x;
-    srcrect.h = ye - srcrect.y;
-    dstrect.x = ((x * win_xscale) >> 16);
-    dstrect.y = ((y * win_yscale) >> 16);
-    dstrect.w = ((srcrect.w * win_xscale) >> 16);
-    dstrect.h = ((srcrect.h * win_yscale) >> 16);
-
-    xstep = (srcrect.w << 16) / dstrect.w;
-    ystep = (srcrect.h << 16) / dstrect.h;
-
-    srcy = ((srcrect.y) << 16);
-    dinset = ((surface->w - dstrect.w)) * surface->format->BytesPerPixel;
-
-    // Lock the surface if necessary
-    if(SDL_MUSTLOCK(surface))
-        SDL_LockSurface(surface);
-
-    dpixel = (Uint8 *)surface->pixels;
-    dpixel += (dstrect.x + ((dstrect.y) * surface->w)) * surface->format->BytesPerPixel;
+    int w = xe - x1;
+    int h = ye - y1;
 
     // Update surface part
-    if ((win_xscale==1<<16) && (win_yscale==1<<16)) // no scaling or hw scaling
+    dpixel = ((Uint8 *)tex_ptr) + y * xres + x;
+    for(ii=0 ; ii < h; ii++)
     {
-        srcy = srcrect.y;
-        dpixel = ((Uint8 *)surface->pixels) + y * surface->w + x ;
-        for(ii=0 ; ii < srcrect.h; ii++)
-        {
-            memcpy(dpixel, im->scan_line(srcy) + srcrect.x , srcrect.w);
-            dpixel += surface->w;
-            srcy ++;
-        }
+        memcpy(dpixel, im->scan_line(srcy) + srcx , w);
+        dpixel += xres;
+        srcy ++;
     }
-    else    // sw scaling
-    {
-        xstep = (srcrect.w << 16) / dstrect.w;
-        ystep = (srcrect.h << 16) / dstrect.h;
-
-        srcy = ((srcrect.y) << 16);
-        dinset = ((surface->w - dstrect.w)) * surface->format->BytesPerPixel;
-
-        dpixel = (Uint8 *)surface->pixels + (dstrect.x + ((dstrect.y) * surface->w)) * surface->format->BytesPerPixel;
-
-        for(ii = 0; ii < dstrect.h; ii++)
-        {
-            srcx = (srcrect.x << 16);
-            for(jj = 0; jj < dstrect.w; jj++)
-            {
-                memcpy(dpixel, im->scan_line((srcy >> 16)) + ((srcx >> 16) * surface->format->BytesPerPixel), surface->format->BytesPerPixel);
-                dpixel += surface->format->BytesPerPixel;
-                srcx += xstep;
-            }
-            dpixel += dinset;
-            srcy += ystep;
-        }
-//        dpixel += dinset;
-//        srcy += ystep;
-    }
-
-    // Unlock the surface if we locked it.
-    if(SDL_MUSTLOCK(surface))
-        SDL_UnlockSurface(surface);
 
     // Now blit the surface
-    update_window_part(&dstrect);
+    update_window_part(NULL);
 }
 
 //
@@ -331,15 +171,13 @@ void palette::load()
     if(ncolors > 256)
         ncolors = 256;
 
-    SDL_Color colors[ncolors];
+    uint32_t colors[ncolors];
     for(int ii = 0; ii < ncolors; ii++)
     {
-        colors[ii].r = red(ii);
-        colors[ii].g = green(ii);
-        colors[ii].b = blue(ii);
+        colors[ii] = blue(ii) | green(ii) << 8 | red(ii) << 16 | 0xFF << 24;
     }
-
-    SDL_SetPaletteColors(surface->format->palette, colors, 0, ncolors);
+	
+	memcpy(vita2d_texture_get_palette(tex_buffer), colors, sizeof(uint32_t) * ncolors);
 
     // Now redraw the surface
     update_window_part(NULL);
@@ -358,16 +196,11 @@ void palette::load_nice()
 
 void update_window_done()
 {
-    // opengl blit complete surface to window
-    
-    // convert color-indexed surface to RGBA surface
-    SDL_BlitSurface(surface, NULL, rgba_surface, NULL);
-
-    SDL_UpdateTexture(texture, NULL, rgba_surface->pixels, rgba_surface->pitch);
-    
-    SDL_RenderClear(renderer);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
-    SDL_RenderPresent(renderer);
+    vita2d_start_drawing();
+	vita2d_draw_texture_scale(tex_buffer, 45, 0, 2.72, 2.72);
+	vita2d_end_drawing();
+	vita2d_wait_rendering_done();
+	vita2d_swap_buffers();
 }
 
 static void update_window_part(SDL_Rect *rect)

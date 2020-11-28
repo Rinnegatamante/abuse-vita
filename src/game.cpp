@@ -2325,7 +2325,10 @@ int main(int argc, char *argv[])
     if (tcpip.installed())
         fprintf(stderr, "Using %s\n", tcpip.name());
 #endif
-    setenv("HOME", "sdmc:/switch", 0);
+	
+	xres = 320;
+	yres = 200;
+    setenv("HOME", "ux0:/data/abuse", 0);
 
 
     set_dprinter(game_printer);
