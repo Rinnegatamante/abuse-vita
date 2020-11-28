@@ -2281,6 +2281,7 @@ int main(int argc, char *argv[])
 	scePowerSetBusClockFrequency(222);
 	scePowerSetGpuClockFrequency(222);
 	scePowerSetGpuXbarClockFrequency(166);
+	sceIoMkdir("ux0:data/abuse", 0777);
     start_argc = argc;
     start_argv = argv;
 

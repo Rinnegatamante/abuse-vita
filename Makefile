@@ -1,4 +1,5 @@
 TARGET		:= Abuse
+TITLE		:= ABUSEVITA
 SOURCES		:= src src/net src/imlib src/lisp src/ui src/sdl2port src/lol		
 INCLUDES	:= src src/imlib src/lisp src/new src/sdl/sdl2port
 
@@ -22,18 +23,25 @@ PREFIX  = arm-vita-eabi
 CC      = $(PREFIX)-gcc
 CXX      = $(PREFIX)-g++
 CFLAGS  = -fno-lto -g -Wl,-q -O2 -ftree-vectorize -DVITA \
-	-DNO_CHECK -DPACKAGE_NAME="\"Abuse\"" -DPACKAGE_VERSION="\"0.8\"" -DASSETDIR="\"app0:/\"" \
+	-DNO_CHECK -DPACKAGE_NAME="\"Abuse\"" -DPACKAGE_VERSION="\"0.8\"" -DASSETDIR="\"app0:/data/\"" \
 	$(INCLUDE_DIRS) -I$(VITASDK)/$(PREFIX)/include/SDL2 -Wno-class-conversion
 CXXFLAGS  = $(CFLAGS) -fno-exceptions -std=gnu++11 -fpermissive
 ASFLAGS = $(CFLAGS)
 
-all: $(TARGET).velf
+all: $(TARGET).vpk
+
+$(TARGET).vpk: $(TARGET).velf
+	vita-make-fself -s $< data/eboot.bin
+	vita-mksfoex -s TITLE_ID=$(TITLE) -d ATTRIBUTE2=12 "$(TARGET)" data/sce_sys/param.sfo
+
+	#------------ Comment this if you don't have 7zip ------------------
+	7z a -tzip ./$(TARGET).vpk -r ./data/sce_sys ./data/data ./data/eboot.bin
+	#-------------------------------------------------------------------
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
 	$(PREFIX)-strip -g $<
 	vita-elf-create $< $@
-	vita-make-fself -s $@ eboot.bin
 
 $(TARGET).elf: $(OBJS)
 	$(CXX) $(CXXFLAGS) $^ $(LIBS) -o $@
