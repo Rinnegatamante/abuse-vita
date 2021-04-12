@@ -167,7 +167,7 @@ void EventHandler::SysEvent(Event &ev)
 		ev.mouse_move.x = sdlev.tfinger.x * main_screen->Size().x,
 		ev.mouse_move.y = sdlev.tfinger.y * main_screen->Size().y;
 		ev.mouse_button = LEFT_BUTTON;
-		sceClibPrintf("%d %d\n", ev.mouse_move.x, ev.mouse_move.y);
+		ev.type = EV_MOUSE_BUTTON;
 		m_pos = ivec2(ev.mouse_move.x, ev.mouse_move.y);
 	  } else {
 		ev.mouse_button = -1;
