@@ -115,8 +115,6 @@ void EventHandler::SysEvent(Event &ev)
     ev.key = -1;
     //ev.mouse_button = m_button;
 
-    ev.type = EV_SPURIOUS;
-
     // Gather next event
     SDL_Event sdlev;
     if (!SDL_PollEvent(&sdlev))
@@ -164,22 +162,17 @@ void EventHandler::SysEvent(Event &ev)
     case SDL_FINGERDOWN:
     case SDL_FINGERUP:
     {
-      /*if(sdlev.type == SDL_FINGERDOWN)
+      if(sdlev.type == SDL_FINGERDOWN)
       {
-		  printf("fingerdown\n");
-          ev.mouse_button |= LEFT_BUTTON;
-      }
-      else
-      {
-		  printf("fingerup\n");
-          ev.mouse_button &= ( 0xff - LEFT_BUTTON );
-      }
-      m_button = ev.mouse_button;
-      m_pos = ivec2(
-		      sdlev.tfinger.x * main_screen->Size().x,
-		      sdlev.tfinger.y * main_screen->Size().y);
-      ev.type = EV_MOUSE_BUTTON;
-      break;*/
+		ev.mouse_move.x = sdlev.tfinger.x * main_screen->Size().x,
+		ev.mouse_move.y = sdlev.tfinger.y * main_screen->Size().y;
+		ev.mouse_button = LEFT_BUTTON;
+		sceClibPrintf("%d %d\n", ev.mouse_move.x, ev.mouse_move.y);
+		m_pos = ivec2(ev.mouse_move.x, ev.mouse_move.y);
+	  } else {
+		ev.mouse_button = -1;
+	  }
+      break;
     }
     break;
 	case SDL_CONTROLLERAXISMOTION:
@@ -507,8 +500,8 @@ void controller_to_mouse( Event &ev, SDL_Event *sdl_event, bool circle )
       lr_axis = SDL_GameControllerGetAxis(controller, (SDL_GameControllerAxis)2); 
       ud_axis = SDL_GameControllerGetAxis(controller, (SDL_GameControllerAxis)3); 
       
-      lr_axis /= 512;
-      ud_axis /= -512; // flip this axis
+      lr_axis /= 1024;
+      ud_axis /= -1024; // flip this axis
 
       // convert to mouse position
       float theta = 0.0;

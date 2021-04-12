@@ -342,6 +342,8 @@ void setup( int argc, char **argv )
     }
     atexit( SDL_Quit );
 
+	SDL_CreateWindow("dummy", 45, 0, 915, 544, SDL_WINDOW_FULLSCREEN);
+
     // Set the savegame directory
     char *homedir;
     char *savedir;
