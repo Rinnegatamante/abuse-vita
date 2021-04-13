@@ -32,10 +32,7 @@ all: $(TARGET).vpk
 $(TARGET).vpk: $(TARGET).velf
 	vita-make-fself -s $< data/eboot.bin
 	vita-mksfoex -s TITLE_ID=$(TITLE) -d ATTRIBUTE2=12 "$(TARGET)" data/sce_sys/param.sfo
-
-	#------------ Comment this if you don't have 7zip ------------------
-	7z a -tzip ./$(TARGET).vpk -r ./data/sce_sys ./data/data ./data/eboot.bin
-	#-------------------------------------------------------------------
+	vita-pack-vpk -s data/sce_sys/param.sfo -b data/eboot.bin -a data/sce_sys=sce_sys -a data/data=data $(TARGET).vpk
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf
