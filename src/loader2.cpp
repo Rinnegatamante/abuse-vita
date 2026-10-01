@@ -56,7 +56,7 @@ int big_font_pict=-1,small_font_pict=-1,console_font_pict=-1,cdc_logo;
 
 int title_screen;
 
-ColorFilter *color_table;
+ColorFilter *abuse_color_table;
 
 
 int border_tile,window_texture,
@@ -293,7 +293,7 @@ void load_data(int argc, char **argv)
     foretiles=NULL;
     backtiles=NULL;
     pal=NULL;
-    color_table=NULL;
+    abuse_color_table=NULL;
 
 # if 0
     int should_save_sd_cache = 0;

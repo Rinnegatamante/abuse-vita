@@ -673,7 +673,7 @@ void game_object::draw_trans(int count, int max)
           ivec2((direction<0 ? x-(cpict->Size().x-x_center()-1) : x-x_center())-current_vxadd,
                 y-cpict->Size().y+1-current_vyadd),
           count,max,
-          color_table,the_game->current_palette());
+          abuse_color_table,the_game->current_palette());
 }
 
 
@@ -686,7 +686,7 @@ void game_object::draw_tint(int tint_id)
                      y-cpict->Size().y+1-current_vyadd),
                fade_count(),fade_max(),
                cache.ctint(tint_id)->data,
-               color_table,the_game->current_palette());
+               abuse_color_table,the_game->current_palette());
 
 
   else
@@ -706,7 +706,7 @@ void game_object::draw_double_tint(int tint_id, int tint2)
                      y-cpict->Size().y+1-current_vyadd),
                fade_count(),fade_max(),
                cache.ctint(tint_id)->data,
-               color_table,the_game->current_palette());
+               abuse_color_table,the_game->current_palette());
 
 
   else

@@ -3,13 +3,16 @@ TITLE		:= ABUSEVITA
 SOURCES		:= src src/net src/imlib src/lisp src/ui src/sdl2port src/lol		
 INCLUDES	:= src src/imlib src/lisp src/new src/sdl/sdl2port
 
-LIBS = -lSDL2_mixer -lSDL2_ttf -lSDL2_image -lSDL2 -lvita2d -lSceLibKernel_stub -lScePvf_stub \
+PKG_CONFIG = arm-vita-eabi-pkg-config
+SDL_LIBS := $(shell $(PKG_CONFIG) --static --libs SDL2_mixer SDL2_ttf SDL2_image)
+
+LIBS = $(SDL_LIBS) -lSDL2_mixer -lSDL2_ttf -lSDL2_image -lSDL2 -lvita2d -lSceLibKernel_stub -lScePvf_stub \
 	-lSceAppMgr_stub -lSceCtrl_stub -lSceTouch_stub -lSceMotion_stub \
 	-lm -lSceNet_stub -lSceNetCtl_stub -lSceAppUtil_stub -lScePgf_stub \
 	-ljpeg -lfreetype -lc -lScePower_stub -lSceCommonDialog_stub -lpng16 -lz \
 	-lspeexdsp -lmpg123 -lSceAudio_stub -lSceGxm_stub -lSceDisplay_stub \
 	-lSceHttp_stub -lSceAudioIn_stub -lSceSysmodule_stub -lSceSsl_stub \
-	-lvorbisfile -lvorbis -logg -lSceHid_stub -lmikmod -lFLAC
+	-lvorbisfile -lvorbis -logg -lSceHid_stub -lmikmod -lFLAC -lSceShaccCgExt -ltaihen_stub
 
 CFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.c))
 CPPFILES   := $(foreach dir,$(SOURCES), $(wildcard $(dir)/*.cpp))
@@ -32,7 +35,10 @@ all: $(TARGET).vpk
 $(TARGET).vpk: $(TARGET).velf
 	vita-make-fself -s $< data/eboot.bin
 	vita-mksfoex -s TITLE_ID=$(TITLE) -d ATTRIBUTE2=12 "$(TARGET)" data/sce_sys/param.sfo
-	vita-pack-vpk -s data/sce_sys/param.sfo -b data/eboot.bin -a data/sce_sys=sce_sys -a data/data=data $(TARGET).vpk
+	vita-pack-vpk -s data/sce_sys/param.sfo -b data/eboot.bin \
+		-a data/sce_sys/icon0.png=sce_sys/icon0.png \
+		-a data/sce_sys/livearea=sce_sys/livearea \
+		-a data/data=data $(TARGET).vpk
 
 %.velf: %.elf
 	cp $< $<.unstripped.elf

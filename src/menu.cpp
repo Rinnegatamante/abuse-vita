@@ -67,7 +67,7 @@ static void TintArea(ivec2 aa, ivec2 bb,
             uint8_t r = (((paddr[0] - r_to) * percent) >> 8) + r_to;
             uint8_t g = (((paddr[1] - g_to) * percent) >> 8) + g_to;
             uint8_t b = (((paddr[2] - b_to) * percent) >> 8) + b_to;
-            *sl = color_table->Lookup((r) >> 3, (g) >> 3, (b) >> 3);
+            *sl = abuse_color_table->Lookup((r) >> 3, (g) >> 3, (b) >> 3);
         }
     }
     main_screen->AddDirty(aa, bb);

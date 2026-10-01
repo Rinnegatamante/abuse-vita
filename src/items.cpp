@@ -235,7 +235,7 @@ foretile::foretile(bFILE *fp)
     exit(0);
   }
 
-  if (!color_table)
+  if (!abuse_color_table)
   {
     lbreak("color filter has no been defined\nuse load_color_filter before load_tiles");
     exit(0);
@@ -257,7 +257,7 @@ foretile::foretile(bFILE *fp)
 
   for (l=0; l<AUTOTILE_WIDTH*AUTOTILE_HEIGHT; l++)
     micro_image->PutPixel(ivec2(l % AUTOTILE_WIDTH, l / AUTOTILE_WIDTH),
-       color_table->Lookup((r[l]/(t[l]*4/5))>>3,
+       abuse_color_table->Lookup((r[l]/(t[l]*4/5))>>3,
                  (g[l]/(t[l]*4/5))>>3,
                  (b[l]/(t[l]*4/5))>>3));
 

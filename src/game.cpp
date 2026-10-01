@@ -2013,7 +2013,7 @@ Game::~Game()
     free(weapon_types);
 
   config_cleanup();
-  delete color_table;
+  delete abuse_color_table;
   delete wm;
   delete game_font;
   delete big_font;

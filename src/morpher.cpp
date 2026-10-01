@@ -25,7 +25,7 @@ void morph_char::draw(game_object *who, view *v)
     {
         ivec2 pos = the_game->GameToMouse(ivec2(who->x - (cx >> 16),
                                                 who->y - (cy >> 16)), v);
-        mor->show(main_screen, pos.x, pos.x, color_table, pal, 1000);
+        mor->show(main_screen, pos.x, pos.x, abuse_color_table, pal, 1000);
         cx += dcx;
         cy += dcy;
         fleft--;
